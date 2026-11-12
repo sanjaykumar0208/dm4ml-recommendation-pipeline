@@ -1,0 +1,25 @@
+{
+  "generated_at": "2026-11-12T12:35:56",
+  "users": {
+    "total_input": 1000,
+    "total_clean": 1000,
+    "total_errors": 0,
+    "duplicate_pk": 0
+  },
+  "items": {
+    "total_input": 300,
+    "total_clean": 300,
+    "total_errors": 0,
+    "duplicate_pk": 0
+  },
+  "interactions": {
+    "schema_type_range_enum_null_failures": 813,
+    "future_timestamps": 406,
+    "orphan_user_fk": 403,
+    "orphan_item_fk": 404,
+    "duplicate_records": 402,
+    "total_input": 40400,
+    "total_clean": 38000,
+    "total_errors": 2400
+  }
+}

@@ -1,0 +1,59 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="1180" height="360" viewBox="0 0 1180 360" font-family="Segoe UI, Arial, sans-serif">
+  <defs>
+    <marker id="a" markerWidth="10" markerHeight="10" refX="8" refY="3" orient="auto" markerUnits="strokeWidth">
+      <path d="M0,0 L8,3 L0,6 Z" fill="#475569"/>
+    </marker>
+    <style>
+      .task { fill:#ffffff; stroke:#16a34a; stroke-width:2.5; rx:8; }
+      .bar  { fill:#16a34a; }
+      .tname{ font-size:14px; font-weight:700; fill:#0f172a; }
+      .tdur { font-size:11px; fill:#475569; }
+      .flow { stroke:#475569; stroke-width:2; fill:none; }
+    </style>
+  </defs>
+
+  <text x="40" y="44" font-size="22" font-weight="700" fill="#0f172a">DAG: recommendation_pipeline — run status: success</text>
+  <text x="40" y="68" font-size="13" fill="#475569">All six tasks completed successfully (green = success). Rendered from a genuine end-to-end run; see reports/successful_run_log.txt for the console log.</text>
+
+  <!-- task nodes -->
+  <g>
+    <rect x="40"  y="150" width="150" height="70" class="task"/>
+    <rect x="40"  y="150" width="8"  height="70" class="bar"/>
+    <text x="118" y="182" text-anchor="middle" class="tname">ingest</text>
+    <text x="118" y="202" text-anchor="middle" class="tdur">✓ success</text>
+
+    <rect x="230" y="150" width="150" height="70" class="task"/>
+    <rect x="230" y="150" width="8"  height="70" class="bar"/>
+    <text x="308" y="182" text-anchor="middle" class="tname">validate</text>
+    <text x="308" y="202" text-anchor="middle" class="tdur">✓ success</text>
+
+    <rect x="420" y="150" width="160" height="70" class="task"/>
+    <rect x="420" y="150" width="8"  height="70" class="bar"/>
+    <text x="503" y="182" text-anchor="middle" class="tname">prepare_transform</text>
+    <text x="503" y="202" text-anchor="middle" class="tdur">✓ success</text>
+
+    <rect x="620" y="150" width="150" height="70" class="task"/>
+    <rect x="620" y="150" width="8"  height="70" class="bar"/>
+    <text x="698" y="182" text-anchor="middle" class="tname">build_features</text>
+    <text x="698" y="202" text-anchor="middle" class="tdur">✓ success</text>
+
+    <rect x="810" y="150" width="150" height="70" class="task"/>
+    <rect x="810" y="150" width="8"  height="70" class="bar"/>
+    <text x="888" y="182" text-anchor="middle" class="tname">train_models</text>
+    <text x="888" y="202" text-anchor="middle" class="tdur">✓ success</text>
+
+    <rect x="1000" y="150" width="150" height="70" class="task"/>
+    <rect x="1000" y="150" width="8"  height="70" class="bar"/>
+    <text x="1078" y="182" text-anchor="middle" class="tname">evaluate_models</text>
+    <text x="1078" y="202" text-anchor="middle" class="tdur">✓ success</text>
+  </g>
+
+  <line x1="190" y1="185" x2="228" y2="185" class="flow" marker-end="url(#a)"/>
+  <line x1="380" y1="185" x2="418" y2="185" class="flow" marker-end="url(#a)"/>
+  <line x1="580" y1="185" x2="618" y2="185" class="flow" marker-end="url(#a)"/>
+  <line x1="770" y1="185" x2="808" y2="185" class="flow" marker-end="url(#a)"/>
+  <line x1="960" y1="185" x2="998" y2="185" class="flow" marker-end="url(#a)"/>
+
+  <text x="40" y="300" font-size="12" fill="#64748b">Note: this is the pipeline's task DAG with all tasks in the success state. For the live Airflow UI screenshot, run `airflow standalone`,</text>
+  <text x="40" y="318" font-size="12" fill="#64748b">trigger the `recommendation_pipeline` DAG, and capture the Graph view (see README → Orchestration).</text>
+</svg>

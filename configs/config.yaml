@@ -1,0 +1,104 @@
+# =============================================================================
+# Configuration for the End-to-End Recommendation Pipeline
+# Domain: Movie recommendation (MovieLens-style schema)
+# All paths are relative to the project root.
+# =============================================================================
+
+project:
+  name: movie-recommendation-pipeline
+  random_seed: 42
+
+# -----------------------------------------------------------------------------
+# Data source. Set `mode` to:
+#   synthetic  -> generate reproducible synthetic data (default, no downloads)
+#   csv        -> read user-supplied CSVs from data/raw/
+# To use real MovieLens, drop ratings.csv / movies.csv into data/raw/, map the
+# columns to the schema below, and set mode: csv.
+# -----------------------------------------------------------------------------
+ingestion:
+  mode: synthetic
+  synthetic:
+    n_users: 1000
+    n_items: 300
+    n_interactions: 40000
+    n_categories: 12
+    start_date: "2023-01-01"
+    end_date: "2024-12-31"
+    # Fraction of records deliberately corrupted so the validation stage has
+    # something real to catch (missing values, bad ratings, bad timestamps,
+    # duplicates, orphan foreign keys).
+    dirty_fraction: 0.05
+  paths:
+    users_raw: data/raw/users.csv
+    items_raw: data/raw/items.csv
+    interactions_raw: data/raw/interactions.csv
+
+# -----------------------------------------------------------------------------
+# Validation rules (consumed by src/validation).
+# -----------------------------------------------------------------------------
+validation:
+  rating_min: 0.5
+  rating_max: 5.0
+  valid_event_types: ["view", "click", "rating", "purchase"]
+  report_path: reports/validation_report.json
+  error_paths:
+    users: data/errors/users_errors.csv
+    items: data/errors/items_errors.csv
+    interactions: data/errors/interactions_errors.csv
+
+# -----------------------------------------------------------------------------
+# Preparation / transformation.
+# -----------------------------------------------------------------------------
+preparation:
+  # Time-based split: interactions strictly before `train_cutoff` -> train,
+  # on/after -> test. Chosen as a quantile of the interaction timestamps.
+  test_fraction: 0.2
+  min_user_interactions: 5   # drop cold users below this (train side)
+  min_item_interactions: 5   # drop cold items below this (train side)
+  paths:
+    users_clean: data/processed/users_clean.parquet
+    items_clean: data/processed/items_clean.parquet
+    interactions_clean: data/processed/interactions_clean.parquet
+    train: data/processed/train.parquet
+    test: data/processed/test.parquet
+    user_activity: data/processed/user_activity_summary.parquet
+    item_popularity: data/processed/item_popularity.parquet
+    user_item_matrix: data/processed/user_item_matrix.parquet
+
+# -----------------------------------------------------------------------------
+# Feature store (custom file-based feature layer).
+# -----------------------------------------------------------------------------
+features:
+  paths:
+    user_features: data/features/user_features.parquet
+    item_features: data/features/item_features.parquet
+    catalog: reports/feature_catalog.csv
+
+# -----------------------------------------------------------------------------
+# Model training.
+# -----------------------------------------------------------------------------
+training:
+  top_k: 10
+  mlflow:
+    # SQLite backend (file store is deprecated / in maintenance mode in recent
+    # MLflow). Open the UI with:
+    #   mlflow ui --backend-store-uri sqlite:///mlflow.db
+    tracking_uri: sqlite:///mlflow.db
+    experiment_name: movie-recommendation
+  matrix_factorization:
+    n_factors: 20
+    n_epochs: 30
+    lr: 0.01
+    reg: 0.05
+  paths:
+    popularity_model: models/popularity_model.pkl
+    mf_model: models/mf_model.pkl
+
+# -----------------------------------------------------------------------------
+# Evaluation.
+# -----------------------------------------------------------------------------
+evaluation:
+  k_values: [5, 10]
+  primary_k: 10
+  results_path: reports/evaluation_results.csv
+  results_md: reports/evaluation_results.md

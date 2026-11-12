@@ -1,0 +1,120 @@
+
+===__STAGE__===|Stage 1 - Data Ingestion|python -m src.ingestion.ingest
+$ python -m src.ingestion.ingest
+2026-11-12 11:56:50 | INFO    | ingestion              | Generating synthetic data (seed=42) ...
+2026-11-12 11:56:50 | INFO    | ingestion              | Generated users=1000 items=300 interactions=40400 (incl. injected defects)
+2026-11-12 11:56:50 | INFO    | ingestion              | Raw tables written to data/raw/
+
+[preview] data/raw/interactions.csv (first 5 rows):
+ user_id  item_id  rating event_type                     timestamp
+     750       14    -2.0      click 2023-08-03 10:39:45.927007362
+     567       65     5.0     rating 2024-07-10 00:38:31.977565308
+      43       63     5.0       view 2023-12-06 09:04:45.800617208
+     863      152     5.0       view 2024-01-24 17:48:45.451192199
+     665       41     3.5     rating 2024-09-25 13:06:34.632948526
+
+Rows -> users=1000, items=300, interactions=40400
+
+===__STAGE__===|Stage 2 - Data Validation|python -m src.validation.validate
+$ python -m src.validation.validate
+2026-11-12 11:56:50 | INFO    | validation             | Validating users / items / interactions ...
+2026-11-12 11:56:51 | INFO    | validation             | Validation done. interactions: 38000 clean / 2400 errors (5.9% rejected).
+2026-11-12 11:56:51 | INFO    | validation             | Validation report -> reports/validation_report.json
+
+[preview] reports/validation_report.json (interactions):
+{
+  "schema_type_range_enum_null_failures": 813,
+  "future_timestamps": 406,
+  "orphan_user_fk": 403,
+  "orphan_item_fk": 404,
+  "duplicate_records": 402,
+  "total_input": 40400,
+  "total_clean": 38000,
+  "total_errors": 2400
+}
+
+[preview] data/errors/interactions_errors.csv - top failure reasons:
+error_reasons
+rating_invalid                     800
+orphan_item_id                     400
+orphan_user_id                     400
+timestamp_in_future                398
+duplicate_record                   374
+rating_invalid;duplicate_record     13
+
+===__STAGE__===|Stage 3 - Data Preparation & Transformation|python -m src.preparation.prepare
+$ python -m src.preparation.prepare
+2026-11-12 11:56:51 | INFO    | preparation            | Time split at 2024-08-06 20:21:22.200000 -> train=30400 test=7600
+2026-11-12 11:56:51 | INFO    | preparation            | After cold-start filter: train=30382 (users=995 items=300) | test=7597
+2026-11-12 11:56:51 | INFO    | preparation            | Processed datasets written to data/processed/
+
+Time-based split -> train=30382, test=7597
+
+[preview] data/processed/item_popularity.parquet (top 5 by rank):
+ item_id  item_interaction_count  item_avg_rating  item_distinct_users  item_popularity_rank
+     107                     836           4.9886                  153                     1
+      53                     528           4.9489                  138                     2
+      73                     475           4.9432                  134                     3
+     233                     466           4.9421                  148                     4
+     247                     456           4.9254                  155                     5
+
+[preview] user-item matrix shape: (995, 300)
+
+===__STAGE__===|Stage 4 - Feature Management|python -m src.features.feature_store
+$ python -m src.features.feature_store
+2026-11-12 11:56:51 | INFO    | features               | User/item features + feature catalog persisted.
+2026-11-12 11:56:51 | INFO    | features               | Feature store built: 995 users x 11 user-features | 300 items x 9 item-features
+
+[preview] reports/feature_catalog.csv (first 8 features):
+           feature_name entity dtype                                                      description     source_stage
+ user_interaction_count   user   int                      Number of training interactions by the user activity_summary
+        user_avg_rating   user float                                       Mean rating the user gives activity_summary
+        user_rating_std   user float                 Std dev of the user's ratings (rating pickiness)         features
+    user_distinct_items   user   int                 Count of distinct items the user interacted with activity_summary
+   user_days_since_last   user   int Days from the user's last interaction to the data reference date activity_summary
+user_preferred_category   user   str                     Category the user interacts with most (mode)         features
+               user_age   user   int                                           User age (demographic)      users_clean
+           user_country   user   str                                       User country (demographic)      users_clean
+
+[preview] data/features/user_features.parquet (first 3 users):
+ user_id  user_interaction_count  user_avg_rating  user_distinct_items user_first_interaction user_last_interaction  user_days_since_last  user_rating_std user_preferred_category  user_age user_country
+       1                      29           4.8621                   19    2023-01-12 00:21:01   2024-06-14 19:35:12                    53           0.5809                  Comedy        18           JP
+       2                       8           4.1875                    8    2023-03-18 22:46:12   2024-06-07 01:23:11                    60           1.0999                  Action        64           CA
+       3                      17           4.7353                   11    2023-01-09 12:22:12   2024-06-20 16:26:19                    47           0.5037                 Romance        56           SG
+
+===__STAGE__===|Stage 5 - Model Training (MLflow tracked)|python -m src.training.train
+$ python -m src.training.train
+2026/11/12 11:56:53 INFO mlflow.store.db.utils: Creating initial MLflow database tables...
+2026/11/12 11:56:53 INFO mlflow.store.db.utils: Updating database tables
+2026/11/12 11:56:54 INFO mlflow.tracking.fluent: Experiment with name 'movie-recommendation' does not exist. Creating a new experiment.
+2026-11-12 11:56:54 | INFO    | training               | Trained popularity baseline (run_id=0fdc8ed3e89c4130909abfffd63cbc49)
+2026-11-12 11:57:02 | INFO    | training               | Trained matrix factorization (run_id=26dcea4a27a643ceac394a0d26d91c18, final_train_rmse=0.4337)
+
+[preview] MLflow tracked runs (sqlite:///mlflow.db):
+            run_name           model_type final_train_rmse
+matrix_factorization matrix_factorization         0.433726
+ popularity_baseline  popularity_baseline                -
+
+===__STAGE__===|Stage 6 - Model Evaluation|python -m src.evaluation.evaluate
+$ python -m src.evaluation.evaluate
+2026-11-12 11:57:02 | INFO    | evaluation             | Evaluating Popularity Baseline ...
+2026-11-12 11:57:02 | INFO    | evaluation             | Evaluating Matrix Factorization ...
+2026-11-12 11:57:02 | INFO    | evaluation             | Evaluation results written to reports/
+
+| model                |   precision@5 |   recall@5 |   ndcg@5 |   coverage@5 |   diversity@5 |   precision@10 |   recall@10 |   ndcg@10 |   coverage@10 |   diversity@10 |   rmse |    mae |
+|:---------------------|--------------:|-----------:|---------:|-------------:|--------------:|---------------:|------------:|----------:|--------------:|---------------:|-------:|-------:|
+| Popularity Baseline  |        0.0185 |     0.0172 |   0.0214 |       0.0333 |        0.9776 |         0.0186 |      0.0346 |    0.0279 |        0.0633 |         0.8783 | 0.5359 | 0.3395 |
+| Matrix Factorization |        0.0187 |     0.017  |   0.0218 |       0.31   |        0.9398 |         0.02   |      0.0338 |    0.0284 |        0.4133 |         0.7933 | 0.491  | 0.3013 |
+
+
+===__STAGE__===|Stage 7 - Orchestration (full pipeline run)|python run_pipeline.py
+$ python run_pipeline.py
+The orchestrator chains every stage above in dependency order.
+Equivalent Airflow DAG: dags/recommendation_pipeline_dag.py
+
+DAG task order:
+  ingest >> validate >> prepare_transform >> build_features >> train_models >> evaluate_models
+
+PIPELINE COMPLETE - all stages executed successfully.
+
+===__STAGE__===|END|

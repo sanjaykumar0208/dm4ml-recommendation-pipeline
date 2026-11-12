@@ -1,0 +1,18 @@
+feature_name,entity,dtype,description,source_stage
+user_interaction_count,user,int,Number of training interactions by the user,activity_summary
+user_avg_rating,user,float,Mean rating the user gives,activity_summary
+user_rating_std,user,float,Std dev of the user's ratings (rating pickiness),features
+user_distinct_items,user,int,Count of distinct items the user interacted with,activity_summary
+user_days_since_last,user,int,Days from the user's last interaction to the data reference date,activity_summary
+user_preferred_category,user,str,Category the user interacts with most (mode),features
+user_age,user,int,User age (demographic),users_clean
+user_country,user,str,User country (demographic),users_clean
+item_interaction_count,item,int,Number of training interactions on the item (popularity),item_popularity
+item_avg_rating,item,float,Mean rating received by the item,item_popularity
+item_rating_std,item,float,Std dev of the item's ratings (rating consistency),features
+item_distinct_users,item,int,Count of distinct users who interacted with the item,item_popularity
+item_popularity_rank,item,int,Dense rank of the item by interaction count (1 = most popular),item_popularity
+item_category,item,str,Item category / genre (content),items_clean
+item_age_years,item,int,Years since the item's release year,features
+user_category_affinity,interaction,float,Fraction of a user's interactions that fall in a given item's category,serving
+rating_vs_item_avg,interaction,float,A rating minus the item's average rating (bias signal),serving

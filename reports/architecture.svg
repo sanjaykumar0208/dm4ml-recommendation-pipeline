@@ -1,0 +1,133 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="1180" height="760" viewBox="0 0 1180 760" font-family="Segoe UI, Arial, sans-serif">
+  <defs>
+    <marker id="arrow" markerWidth="10" markerHeight="10" refX="8" refY="3" orient="auto" markerUnits="strokeWidth">
+      <path d="M0,0 L8,3 L0,6 Z" fill="#334155"/>
+    </marker>
+    <style>
+      .stage   { fill:#e0ecff; stroke:#2563eb; stroke-width:2; rx:10; }
+      .store   { fill:#ecfdf5; stroke:#059669; stroke-width:2; rx:10; }
+      .track   { fill:#fef3c7; stroke:#d97706; stroke-width:2; rx:10; }
+      .orch    { fill:#f3e8ff; stroke:#7c3aed; stroke-width:2; }
+      .title   { font-size:26px; font-weight:700; fill:#0f172a; }
+      .sub     { font-size:13px; fill:#475569; }
+      .stageT  { font-size:15px; font-weight:700; fill:#1e3a8a; }
+      .stageD  { font-size:11px; fill:#334155; }
+      .storeT  { font-size:13px; font-weight:700; fill:#065f46; }
+      .lbl     { font-size:11px; fill:#64748b; }
+      .flow    { stroke:#334155; stroke-width:2; fill:none; }
+    </style>
+  </defs>
+
+  <text x="40" y="46" class="title">End-to-End Data Management Pipeline — Recommendation System</text>
+  <text x="40" y="70" class="sub">Movie recommendation (MovieLens-style schema) · reproducible · modular · orchestrated</text>
+
+  <!-- Orchestration band -->
+  <rect x="30" y="95" width="1120" height="70" rx="12" class="orch" fill-opacity="0.25"/>
+  <text x="50" y="122" class="stageT" fill="#6d28d9">Orchestration layer</text>
+  <text x="50" y="142" class="stageD" fill="#6d28d9">Apache Airflow DAG  (dags/recommendation_pipeline_dag.py)  ·  or  run_pipeline.py  (plain Python workflow) — same stage callables, enforced dependencies, retries</text>
+
+  <!-- Stage boxes -->
+  <!-- 1 Ingestion -->
+  <rect x="40"  y="210" width="165" height="90" class="stage" rx="10"/>
+  <text x="122" y="238" text-anchor="middle" class="stageT">1 · Ingestion</text>
+  <text x="122" y="258" text-anchor="middle" class="stageD">Synthetic gen / CSV</text>
+  <text x="122" y="274" text-anchor="middle" class="stageD">users · items ·</text>
+  <text x="122" y="289" text-anchor="middle" class="stageD">interactions</text>
+
+  <!-- 2 Validation -->
+  <rect x="235" y="210" width="165" height="90" class="stage" rx="10"/>
+  <text x="317" y="238" text-anchor="middle" class="stageT">2 · Validation</text>
+  <text x="317" y="258" text-anchor="middle" class="stageD">Pandera schemas</text>
+  <text x="317" y="274" text-anchor="middle" class="stageD">nulls · dupes · ranges</text>
+  <text x="317" y="289" text-anchor="middle" class="stageD">FK integrity · errors</text>
+
+  <!-- 3 Prep/Transform -->
+  <rect x="430" y="210" width="165" height="90" class="stage" rx="10"/>
+  <text x="512" y="234" text-anchor="middle" class="stageT">3 · Prepare &amp;</text>
+  <text x="512" y="251" text-anchor="middle" class="stageT">Transform</text>
+  <text x="512" y="270" text-anchor="middle" class="stageD">clean · impute</text>
+  <text x="512" y="285" text-anchor="middle" class="stageD">time-split · matrices</text>
+
+  <!-- 4 Features -->
+  <rect x="625" y="210" width="165" height="90" class="stage" rx="10"/>
+  <text x="707" y="238" text-anchor="middle" class="stageT">4 · Features</text>
+  <text x="707" y="258" text-anchor="middle" class="stageD">file feature store</text>
+  <text x="707" y="274" text-anchor="middle" class="stageD">user · item · interaction</text>
+  <text x="707" y="289" text-anchor="middle" class="stageD">+ feature catalog</text>
+
+  <!-- 5 Training -->
+  <rect x="820" y="210" width="165" height="90" class="stage" rx="10"/>
+  <text x="902" y="238" text-anchor="middle" class="stageT">5 · Training</text>
+  <text x="902" y="258" text-anchor="middle" class="stageD">Popularity baseline</text>
+  <text x="902" y="274" text-anchor="middle" class="stageD">Matrix factorization</text>
+  <text x="902" y="289" text-anchor="middle" class="stageD">(FunkSVD + biases)</text>
+
+  <!-- 6 Evaluation -->
+  <rect x="1005" y="210" width="145" height="90" class="stage" rx="10"/>
+  <text x="1077" y="238" text-anchor="middle" class="stageT">6 · Evaluate</text>
+  <text x="1077" y="258" text-anchor="middle" class="stageD">P@K · R@K</text>
+  <text x="1077" y="274" text-anchor="middle" class="stageD">NDCG · Coverage</text>
+  <text x="1077" y="289" text-anchor="middle" class="stageD">Diversity · RMSE/MAE</text>
+
+  <!-- flow arrows between stages -->
+  <line x1="205" y1="255" x2="233" y2="255" class="flow" marker-end="url(#arrow)"/>
+  <line x1="400" y1="255" x2="428" y2="255" class="flow" marker-end="url(#arrow)"/>
+  <line x1="595" y1="255" x2="623" y2="255" class="flow" marker-end="url(#arrow)"/>
+  <line x1="790" y1="255" x2="818" y2="255" class="flow" marker-end="url(#arrow)"/>
+  <line x1="985" y1="255" x2="1003" y2="255" class="flow" marker-end="url(#arrow)"/>
+
+  <!-- MLflow tracking -->
+  <rect x="820" y="340" width="165" height="56" class="track" rx="10"/>
+  <text x="902" y="364" text-anchor="middle" class="storeT" fill="#92400e">MLflow tracking</text>
+  <text x="902" y="382" text-anchor="middle" class="stageD" fill="#92400e">params · metrics · artifacts</text>
+  <line x1="902" y1="300" x2="902" y2="338" class="flow" marker-end="url(#arrow)"/>
+  <line x1="1050" y1="300" x2="960" y2="340" class="flow" marker-end="url(#arrow)"/>
+
+  <!-- Data lake / stores row -->
+  <text x="40" y="455" class="stageT" fill="#065f46">Persisted artifacts (local data lake)</text>
+
+  <rect x="40"  y="470" width="200" height="66" class="store" rx="10"/>
+  <text x="140" y="498" text-anchor="middle" class="storeT">data/raw/</text>
+  <text x="140" y="518" text-anchor="middle" class="stageD">users, items, interactions (CSV)</text>
+
+  <rect x="265" y="470" width="150" height="66" class="store" rx="10"/>
+  <text x="340" y="498" text-anchor="middle" class="storeT">data/errors/</text>
+  <text x="340" y="518" text-anchor="middle" class="stageD">rejected rows + reasons</text>
+
+  <rect x="440" y="470" width="215" height="66" class="store" rx="10"/>
+  <text x="547" y="492" text-anchor="middle" class="storeT">data/processed/ (Parquet)</text>
+  <text x="547" y="510" text-anchor="middle" class="stageD">clean · train/test · activity</text>
+  <text x="547" y="525" text-anchor="middle" class="stageD">popularity · user-item matrix</text>
+
+  <rect x="680" y="470" width="180" height="66" class="store" rx="10"/>
+  <text x="770" y="498" text-anchor="middle" class="storeT">data/features/ (Parquet)</text>
+  <text x="770" y="518" text-anchor="middle" class="stageD">user &amp; item feature tables</text>
+
+  <rect x="885" y="470" width="120" height="66" class="store" rx="10"/>
+  <text x="945" y="498" text-anchor="middle" class="storeT">models/</text>
+  <text x="945" y="518" text-anchor="middle" class="stageD">pickled models</text>
+
+  <rect x="1030" y="470" width="120" height="66" class="store" rx="10"/>
+  <text x="1090" y="498" text-anchor="middle" class="storeT">reports/</text>
+  <text x="1090" y="518" text-anchor="middle" class="stageD">report · catalog</text>
+
+  <!-- arrows stage -> store -->
+  <line x1="122" y1="300" x2="130" y2="468" class="flow" stroke-dasharray="4 3" marker-end="url(#arrow)"/>
+  <line x1="317" y1="300" x2="335" y2="468" class="flow" stroke-dasharray="4 3" marker-end="url(#arrow)"/>
+  <line x1="512" y1="300" x2="540" y2="468" class="flow" stroke-dasharray="4 3" marker-end="url(#arrow)"/>
+  <line x1="707" y1="300" x2="765" y2="468" class="flow" stroke-dasharray="4 3" marker-end="url(#arrow)"/>
+  <line x1="902" y1="396" x2="945" y2="468" class="flow" stroke-dasharray="4 3" marker-end="url(#arrow)"/>
+  <line x1="1077" y1="300" x2="1090" y2="468" class="flow" stroke-dasharray="4 3" marker-end="url(#arrow)"/>
+
+  <!-- Legend -->
+  <text x="40" y="600" class="stageT" fill="#0f172a">Legend</text>
+  <rect x="40"  y="615" width="24" height="16" class="stage" rx="4"/><text x="72"  y="628" class="lbl">Pipeline stage</text>
+  <rect x="190" y="615" width="24" height="16" class="store" rx="4"/><text x="222" y="628" class="lbl">Persisted data store</text>
+  <rect x="380" y="615" width="24" height="16" class="track" rx="4"/><text x="412" y="628" class="lbl">Experiment tracking</text>
+  <rect x="560" y="615" width="24" height="16" class="orch" rx="4" fill-opacity="0.25"/><text x="592" y="628" class="lbl">Orchestration</text>
+  <line x1="720" y1="623" x2="760" y2="623" class="flow" marker-end="url(#arrow)"/><text x="768" y="628" class="lbl">Stage flow</text>
+  <line x1="860" y1="623" x2="900" y2="623" class="flow" stroke-dasharray="4 3" marker-end="url(#arrow)"/><text x="908" y="628" class="lbl">Writes artifact</text>
+
+  <text x="40" y="690" class="sub">Data split is strictly time-based (test = most recent interactions) to avoid leakage and mirror production use: predict the future from the past.</text>
+  <text x="40" y="712" class="sub">Each stage is importable and independently runnable; every stage persists its outputs so the pipeline is restartable and inspectable at any point.</text>
+</svg>
